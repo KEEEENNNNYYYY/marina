@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  marina:
+    build:
+      context: ./marina
+    expose:
+      - "3000"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - marina
