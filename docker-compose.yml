@@ -10,7 +10,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:

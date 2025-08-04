@@ -1,20 +1,17 @@
-from fastapi import FastAPI, Request
-import httpx
+from flask import Flask, request, jsonify
+import subprocess
 
-app = FastAPI()
-MARINA_URL = "https://marina-yourname.onrender.com"
+app = Flask(__name__)
 
+@app.route('/run_marina', methods=['GET'])
+def run_marina():
+    args = request.json.get('args', [])
+    try:
+        # Appeler le binaire OCaml avec arguments passés
+        result = subprocess.run(['./marina'] + args, capture_output=True, text=True, check=True)
+        return jsonify({'output': result.stdout})
+    except subprocess.CalledProcessError as e:
+        return jsonify({'error': e.stderr}), 500
 
-@app.get("/")
-async def root():
-    return {"message": "API Python proxy de Marina fonctionne 🎉"}
-
-@app.api_route("/{path:path}", methods=["GET"])
-async def proxy(request: Request, path: str):
-    async with httpx.AsyncClient() as client:
-        method = request.method.lower()
-        body = await request.body()
-        headers = dict(request.headers)
-        url = f"{MARINA_URL}/{path}"
-        response = await client.request(method, url, data=body, headers=headers)
-    return response.json()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
